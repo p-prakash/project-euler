@@ -232,6 +232,11 @@ def is_perfect_square(n):
         return False
 
 
+def is_perfect_root(n, r):
+    powered = int(n ** (1. / r))
+    return powered ** r == n
+
+
 def is_triangular(n):
     sqrt_D = (1 + 8 * n) ** 0.5
     if int(sqrt_D) == sqrt_D and int(sqrt_D) % 2 == 1:
@@ -248,8 +253,16 @@ def is_pentagonal(n):
         return False
 
 
+def triangular(n):
+    return (n * (n + 1)) / 2
+
+
 def pentagonal(n):
     return (n * (3 * n - 1)) / 2
+
+
+def polygonal(s, n):
+    return (s - 2) * n * (n - 1) / 2 + n
 
 
 def is_twice_square(n):

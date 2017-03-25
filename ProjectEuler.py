@@ -2,10 +2,10 @@ import math
 from fractions import gcd
 import io
 import re
-from itertools import permutations
+from itertools import permutations, combinations
 import eulerlib
 import collections
-from operator import itemgetter
+from operator import itemgetter, mul as mulop
 
 
 def pe0001():
@@ -1026,6 +1026,201 @@ def pe0060():
 
     result = find5thpair(primes)
     print 'Answer is %d' % sum(result)
+
+
+def pe0061():
+    print 'Project Euler Problem 61 https://projecteuler.net/problem=61'
+    c_list = []
+    global pairs
+    pairs = [0] * 6
+    indx = 0
+
+    def find_pair(last, l):
+        for x in range(6):
+            if pairs[x] != 0:
+                continue
+            for y in range(len(c_list[x])):
+                if c_list[x][y] not in pairs and str(c_list[x][y])[:2] == str(pairs[last])[2:]:
+                    pairs[x] = c_list[x][y]
+                    if l == 5 and str(pairs[5])[:2] == str(pairs[x])[2:]:
+                        return True
+                    elif find_pair(x, l + 1):
+                        return True
+            pairs[x] = 0
+        return False
+
+    for s in range(3, 9):
+        c_list.append([])
+        for n in range(150):
+            pn = eulerlib.polygonal(s, n)
+            if pn > 1000 and pn < 10000 and int(str(pn)[2:]) > 9:
+                c_list[indx].append(pn)
+            if pn > 9999:
+                indx += 1
+                break
+
+    for i in range(len(c_list[5])):
+        pairs[5] = c_list[5][i]
+        if find_pair(5, 1):
+            break
+    print 'Answer is %d' % sum(pairs)
+
+
+def pe0062():
+    print 'Project Euler Problem 62 https://projecteuler.net/problem=62'
+    num = 345
+    cubes = {}
+    while True:
+        k = ''.join(sorted(str(num ** 3)))
+        if k not in cubes.keys():
+            cubes[k] = []
+        cubes[k].append(num)
+        if len(cubes[k]) == 5:
+            result = sorted(cubes[k])[0] ** 3
+            break
+        num += 1
+
+    print 'Answer is %d' % result
+
+
+def pe0063():
+    print 'Project Euler Problem 63 https://projecteuler.net/problem=63'
+    #
+    # x^n is a n-digit perfect nth power
+    # If 10^{n-1} <= x^n < 10^n and 1 <= x < 10
+    # n-1 <= nlog10(x) therefore: n <= 1 / (1 - log10(x))
+    # We are looking for sum of x 1 --> 9 of 1 / 1 - log10(x)
+    #
+    print 'Answer is %d' % sum([int(1/(1-math.log10(x))) for x in range(1, 10)])
+
+
+def pe0064():
+    print 'Project Euler Problem 64 https://projecteuler.net/problem=64'
+
+    def period(n):
+        m, d, a0 = 0, 1, int(n ** 0.5)
+        a = a0
+        cf = [a0]
+        while a != 2 * a0:
+            m = d * a - m
+            d = (n - m * m) // d
+            a = (a0 + m) // d
+            cf.append(a)
+        return cf
+
+    total = 0
+    for n in range(1, 10001):
+        if not eulerlib.is_perfect_square(n) and (len(period(n)) - 1) % 2 != 0:
+            total += 1
+
+    print 'Answer is %d' % total
+
+
+def pe0065():
+    print 'Project Euler Problem 65 https://projecteuler.net/problem=65'
+    n, n1, n2 = 0, 1, 1
+    for i in range(1, 101):
+        a = (1, (i / 3) * 2)[i % 3 == 0]
+        n = (n1 * a) + n2
+        n2 = n1
+        n1 = n
+    print 'Answer is %d' % sum(map(int, str(n)))
+
+
+def pe0066():
+    print 'Project Euler Problem 66 https://projecteuler.net/problem=66'
+    max_X = 0
+    max_D = 0
+
+    def chakravala(N):
+        a, b, m, k = 1, 0, 1, 1
+        while k != 1 or b == 0:
+            m = k * (m/k+1) - m
+            m = m - int((m - math.sqrt(N))/k) * k
+
+            A = (a*m + N*b) / abs(k)
+            b = (a + b*m) / abs(k)
+            k = (m*m - N) / k
+
+            a = A
+
+        return a
+
+    for N in range(2, 1001):
+        if not eulerlib.is_perfect_square(N):
+            z = chakravala(N)
+            if z > max_X:
+                max_X = z
+                max_D = N
+
+    print 'Answer is %d' % max_D
+
+
+def pe0067():
+    print 'Project Euler Problem 67 https://projecteuler.net/problem=67'
+    pyramid = []
+    gridio = io.open('pe0067.txt', 'r')
+    grid = gridio.readlines()
+    for p in grid:
+        t = p.rstrip().split(' ')
+        for q in range(0, len(t)):
+            t[q] = int(t[q])
+        pyramid.append(t)
+    print 'Answer is ' + str(eulerlib.sum_of_pyramid(pyramid))
+
+
+def pe0068():
+    print 'Project Euler Problem 68 https://projecteuler.net/problem=68'
+    for outer_list in ((10,) + o for o in combinations(range(9, 0, -1), 4)):
+        inner_list = tuple(i for i in range(9, 0, -1) if i not in outer_list)
+        for outer in (outer_list[-1:] + o for o in permutations(outer_list[:-1])):
+            for inner in permutations(inner_list):
+                total = outer[4] + inner[4] + inner[0]
+                if all(outer[i] + inner[i] + inner[i + 1] == total for i in range(4)):
+                    ans = (a for i in range(5) for a in (outer[i], inner[i], inner[(i + 1) % 5]))
+                    print 'Answer is ' + ''.join(map(str, ans))
+                    return
+
+
+def pe0069():
+    print 'Project Euler Problem 69 https://projecteuler.net/problem=69'
+    # To have higher n / phi(n), phi(n) should be smaller
+    # phi(n) = n * sum(1 - 1/p), where p is all prime factors of n
+    # hence if we have more prime factors for a number then that will have less phi(n)
+    limit = 1000001
+    primes = eulerlib.sieve_of_atkin(50)
+    prod = 1
+    pnum = []
+    for p in primes:
+        prod *= p
+        if prod < limit:
+            pnum.append(p)
+        else:
+            break
+    print 'Answer is ' + str(reduce(mulop, pnum, 1))
+
+
+def pe0070():
+    print 'Project Euler Problem 70 https://projecteuler.net/problem=70'
+    # To have lower n / phi(n), phi(n) should be bigger.
+    # Only when n is prime it's bigger with phi(n) = n - 1, but n - 1 will not be permutation of n
+    # phi(n) = n * sum(1 - 1/p), where p is all prime factors of n
+    # Hence if we have less prime factors for a number then that will have higher phi(n), hence go for 2 prime factors.
+    # phi(p1 x p2) = phi(p1) x phi(p2) = (p1 - 1) x (p2 - 1)
+    # It's rational to start from sqrt(10^7)
+    limit = 10 ** 7
+    primes = eulerlib.sieve_of_atkin(2 * int(math.sqrt(limit)))
+    ans = 1
+    min_num = float(10 ** 7)
+    for p1, p2 in combinations(primes, 2):
+        if p1 * p2 < limit:
+            n = p1 * p2
+            phi = (p1 - 1) * (p2 - 1)
+            tmp = float(n) / phi
+            if sorted(str(n)) == sorted(str(phi)) and tmp < min_num:
+                min_num = tmp
+                ans = n
+    print 'Answer is ' + str(ans)
 
 
 if __name__ == '__main__':
