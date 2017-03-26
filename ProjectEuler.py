@@ -6,6 +6,7 @@ from itertools import permutations, combinations
 import eulerlib
 import collections
 from operator import itemgetter, mul as mulop
+from decimal import getcontext, Decimal
 
 
 def pe0001():
@@ -1221,6 +1222,166 @@ def pe0070():
                 min_num = tmp
                 ans = n
     print 'Answer is ' + str(ans)
+
+
+def pe0071():
+    print 'Project Euler Problem 71 https://projecteuler.net/problem=71'
+    n, d = 2, 5
+    while d <= (10 ** 6) - 7:
+        n += 3
+        d += 7
+    print 'Answer is ' + str(n)
+
+
+def pe0072():
+    print 'Project Euler Problem 72 https://projecteuler.net/problem=72'
+    limit = 10 ** 6
+    phi = range(limit + 1)
+    phi[1] = 0
+    for n in range(2, limit + 1):
+        if phi[n] == n:
+            for i in range(n, limit + 1, n):
+                phi[i] -= phi[i] // n
+    print 'Answer is ' + str(sum(phi))
+
+
+def pe0073():
+    print 'Project Euler Problem 73 https://projecteuler.net/problem=73'
+    limit = 12001
+    den = [0] * limit
+    count = 0
+    for i in range(2, limit):
+        fractions = i - (i / 2) - (i / 3) - 1
+        count += fractions
+        num = fractions - den[i]
+        for j in range(2 * i, limit, i):
+            count -= num
+            den[j] += num
+    print 'Answer is ' + str(count)
+
+
+def pe0074():
+    print 'Project Euler Problem 74 https://projecteuler.net/problem=74'
+    limit = 1000000
+    count = 0
+    for i in range(limit, 9, -1):
+        flag = True
+        tmp = i
+        chain = [i]
+        while flag:
+            next_in = sum(math.factorial(int(c)) for c in str(tmp))
+            if next_in in chain:
+                break
+            else:
+                chain.append(next_in)
+                tmp = next_in
+        if len(chain) == 60:
+            count += 1
+    print 'Answer is ' + str(count)
+
+
+def pe0075():
+    print 'Project Euler Problem 75 https://projecteuler.net/problem=75'
+    # Refer: https://en.wikipedia.org/wiki/Pythagorean_triple#Generating_a_triple
+    limit = 1500000
+    py_sum = []
+    m = 2
+    for m in range(2, int(math.sqrt(limit/2)) + 1):
+        mm = m ** 2
+        for n in range(1, m):
+            nn = n ** 2
+            a = mm - nn
+            b = 2 * m * n
+            c = mm + nn
+            pysum = a + b + c
+            if gcd(a, b) == 1:
+                k = 1
+                multiple = k * pysum
+                while multiple < limit + 1:
+                    py_sum.append(multiple)
+                    k += 1
+                    multiple = k * pysum
+    print 'Answer is %d' % collections.Counter(py_sum).values().count(1)
+
+
+def pe0076():
+    print 'Project Euler Problem 76 https://projecteuler.net/problem=76'
+    num = 101
+    combi = [1] * num
+    for i in range(2, num):
+        for j in range(i, num):
+            combi[j] = combi[j] + combi[j - i]
+
+    print 'Answer is %d' % (combi[num - 1] - 1)
+
+
+def pe0077():
+    print 'Project Euler Problem 77 https://projecteuler.net/problem=77'
+    primes = eulerlib.sieve_of_atkin(100)
+    print primes
+    ways = [0] * 100
+    ways[0] = 1
+    for p in primes:
+        for z in range(p, 100):
+            ways[z] = ways[z] + ways[z - p]
+    for w in ways:
+        if w >= 5000:
+            print 'Answer is %d' % ways.index(w)
+            break
+
+
+def pe0078():
+    print 'Project Euler Problem 78 https://projecteuler.net/problem=78'
+    # Refer: https://en.wikipedia.org/wiki/Partition_(number_theory)#Partition_function_formulas
+    part = [1, 1, 2]
+    while True:
+        val = 0
+        n = len(part)
+        for dk in [1, -1]:
+            k = dk
+            while True:
+                i = n - (k*(3*k-1))//2
+                if i < 0:
+                    break
+                val += (1 if k % 2 else -1) * part[i]
+                k += dk
+        if val % 10 ** 6 == 0:
+            print 'Answer is %d' % len(part)
+            break
+        part.append(val)
+
+
+def pe0079():
+    print 'Project Euler Problem 79 https://projecteuler.net/problem=79'
+    with open('pe0079.txt') as f:
+        num = f.readlines()
+
+    num = list(set([l.rstrip() for l in num]))
+    digits = list(set(''.join(map(str, num))))
+
+    def reorder(code, l):
+        i = code.index(l[0])
+        j = code.index(l[1])
+        k = code.index(l[2])
+        i, j, k = sorted((i, j, k))
+        code[i], code[j], code[k] = l
+        return code
+
+    for p in num:
+        reorder(digits, p)
+    print 'Answer is %s' % ''.join(digits)
+
+
+def pe0080():
+    print 'Project Euler Problem 80 https://projecteuler.net/problem=80'
+    getcontext().prec = 102
+    total = 0
+    for i in range(2, 100):
+        if not eulerlib.is_perfect_square(i):
+            root = Decimal(i).sqrt()
+            rootnum = [int(j) for j in (str(root)[:101]).replace('.', '')]
+            total += sum(rootnum)
+    print 'Answer is %d' % total
 
 
 if __name__ == '__main__':

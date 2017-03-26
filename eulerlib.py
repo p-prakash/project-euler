@@ -282,3 +282,17 @@ def upperlimit(primes):
 
 def n_C_r(n, r):
     return math.factorial(n)/(math.factorial(r) * math.factorial(n - r))
+
+
+def phi(n):
+    if(n < 1):
+        return 0
+    if(n == 1):
+        return 1
+    if is_prime(n):
+        return n - 1
+    pf = prime_factors(n)
+    ans = n
+    for f in pf:
+        ans *= (f - 1) / f
+    return ans
